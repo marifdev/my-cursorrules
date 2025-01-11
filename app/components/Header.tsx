@@ -61,7 +61,7 @@ export function Header() {
               <section>
                 <h3 className="mb-2 text-lg font-semibold">How to Submit a Rule</h3>
                 <ol className="list-decimal space-y-2 pl-5 text-gray-300">
-                  <li>Click the "Submit Rule" button in the header</li>
+                  <li>Click the &quot;Submit Your Rule&quot; button in the header</li>
                   <li>Fill in your rule details including name, content, and categories</li>
                   <li>Add your name and contact URL (Twitter/LinkedIn/GitHub)</li>
                   <li>Submit the form and your rule will be added to the collection after review</li>
