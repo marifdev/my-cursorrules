@@ -285,7 +285,7 @@ export default function SubmitPage() {
                   </button>
                 </div>
                 <p className="text-xs text-gray-400">
-                  Tip: You can add multiple categories at once by separating them with commas (e.g., 'TypeScript, React, Next.js')
+                  Tip: You can add multiple categories at once by separating them with commas (e.g., &apos;TypeScript, React, Next.js&apos;)
                 </p>
               </div>
 
