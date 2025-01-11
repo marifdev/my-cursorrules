@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useRules } from '@/app/context/RulesContext'
 
@@ -11,6 +12,19 @@ export function RulePageClient({ id }: RulePageClientProps) {
   const router = useRouter()
   const { rules, isLoading } = useRules()
   const rule = rules.find(r => r.id === id)
+  const [isCopied, setIsCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      if (rule) {
+        await navigator.clipboard.writeText(rule.content)
+        setIsCopied(true)
+        setTimeout(() => setIsCopied(false), 2000)
+      }
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -40,12 +54,34 @@ export function RulePageClient({ id }: RulePageClientProps) {
     <main className="flex h-screen flex-col bg-gray-900 text-white">
       <div className="flex-none p-6">
         <div className="mx-auto max-w-3xl">
-          <button
-            onClick={() => router.push('/')}
-            className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium hover:bg-gray-700"
-          >
-            ← Back to Home
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => router.push('/')}
+              className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium hover:bg-gray-700"
+            >
+              ← Back to Home
+            </button>
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-2 rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium hover:bg-gray-700"
+            >
+              {isCopied ? (
+                <>
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                  </svg>
+                  Copy
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 

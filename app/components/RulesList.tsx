@@ -16,6 +16,18 @@ export function RulesList() {
   const [allRules, setAllRules] = useState<Rule[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  const handleCopy = async (e: React.MouseEvent, content: string, id: string) => {
+    e.stopPropagation()
+    try {
+      await navigator.clipboard.writeText(content)
+      setCopiedId(id)
+      setTimeout(() => setCopiedId(null), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
 
   useEffect(() => {
     async function fetchRules() {
@@ -107,7 +119,22 @@ export function RulesList() {
           className="group cursor-pointer rounded-lg border border-gray-800 bg-gray-900 p-4 sm:p-6 transition-all hover:border-gray-700 hover:bg-gray-800"
         >
           <div className="mb-3 sm:mb-4">
-            <h3 className="mb-2 text-base sm:text-lg font-semibold">{rule.name}</h3>
+            <div className="flex items-start justify-between mb-2">
+              <h3 className="text-base sm:text-lg font-semibold">{rule.name}</h3>
+              <button
+                onClick={(e) => handleCopy(e, rule.content, rule.id)}
+                className="relative -mr-1 p-1.5 text-gray-400 hover:text-gray-300 rounded-lg hover:bg-gray-800"
+              >
+                {copiedId === rule.id ? (
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-gray-800 text-xs whitespace-nowrap">
+                    Copied!
+                  </div>
+                ) : null}
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                </svg>
+              </button>
+            </div>
             <p className="whitespace-pre-wrap text-sm text-gray-400">
               {truncateText(rule.content, window.innerWidth < 640 ? 100 : 150)}
             </p>
