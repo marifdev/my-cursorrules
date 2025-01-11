@@ -7,6 +7,6 @@ interface PageProps {
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export default async function RulePage({ params }: PageProps) {
+export default function RulePage({ params }: PageProps) {
   return <RulePageClient id={params.id} />
 } 
