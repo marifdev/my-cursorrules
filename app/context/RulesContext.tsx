@@ -1,42 +1,67 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { Rule } from '../types'
-
-const mockRules: Rule[] = [
-  {
-    id: '1',
-    name: 'TypeScript Expert',
-    content: `You are an expert in TypeScript, React Native, Expo, and Mobile UI development.
-
-Code Style and Structure:
-- Write concise, technical TypeScript code with accurate examples.
-- Use functional and declarative programming patterns; avoid classes.
-- Prefer iteration and modularization over code duplication.
-- Use descriptive variable names with auxiliary verbs.`,
-    author: {
-      name: 'John Doe',
-      contactUrl: 'https://twitter.com/johndoe',
-      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John'
-    },
-    categories: ['TypeScript', 'React Native', 'Expo'],
-    createdAt: new Date()
-  },
-  // Add more mock rules here
-]
+import { supabase } from '@/lib/supabase'
 
 interface RulesContextType {
   rules: Rule[]
   selectedCategory: string | null
   setSelectedCategory: (category: string | null) => void
   filteredRules: Rule[]
+  isLoading: boolean
+  error: string | null
 }
 
 const RulesContext = createContext<RulesContextType | undefined>(undefined)
 
 export function RulesProvider({ children }: { children: ReactNode }) {
-  const [rules] = useState<Rule[]>(mockRules)
+  const [rules, setRules] = useState<Rule[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchRules() {
+      try {
+        const { data: rulesData, error: rulesError } = await supabase
+          .from('rules')
+          .select(`
+            *,
+            rule_categories (
+              category_id,
+              categories (
+                name
+              )
+            )
+          `)
+          .order('created_at', { ascending: false })
+
+        if (rulesError) throw rulesError
+
+        const transformedRules = rulesData.map(rule => ({
+          id: rule.id,
+          name: rule.name,
+          content: rule.content,
+          author: {
+            name: rule.author_name,
+            contactUrl: rule.author_contact_url,
+          },
+          categories: rule.rule_categories.map((rc: { categories: { name: string } }) => rc.categories.name),
+          createdAt: rule.created_at,
+        }))
+
+        setRules(transformedRules)
+      } catch (err) {
+        console.error('Error fetching rules:', err)
+        setError('Failed to fetch rules')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchRules()
+  }, [])
 
   const filteredRules = selectedCategory
     ? rules.filter(rule => rule.categories.includes(selectedCategory))
@@ -48,7 +73,9 @@ export function RulesProvider({ children }: { children: ReactNode }) {
         rules,
         selectedCategory,
         setSelectedCategory,
-        filteredRules
+        filteredRules,
+        isLoading,
+        error
       }}
     >
       {children}

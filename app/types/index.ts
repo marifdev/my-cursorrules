@@ -5,7 +5,6 @@ export interface Rule {
   author: {
     name: string;
     contactUrl: string;
-    avatarUrl: string;
   };
   categories: string[];
   createdAt: Date;
