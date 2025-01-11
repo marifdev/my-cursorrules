@@ -74,15 +74,16 @@ export function RulePageClient({ id }: RulePageClientProps) {
             </div>
 
             <div className="flex-none border-t border-gray-800 p-8">
-              <p className="text-sm font-medium">{rule.author.name}</p>
-              <a
-                href={rule.author.contactUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-400 hover:underline"
-              >
-                Contact
-              </a>
+              <div className="flex justify-end">
+                <a
+                  href={rule.author.contactUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-gray-300 hover:text-blue-400 hover:underline"
+                >
+                  {rule.author.name}
+                </a>
+              </div>
             </div>
           </div>
         </div>

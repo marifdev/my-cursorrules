@@ -63,7 +63,7 @@ export function Sidebar() {
 
   if (isLoading) {
     return (
-      <aside className="w-64 border-r border-gray-800 p-6">
+      <aside className="w-64 border-r border-gray-800 p-6 h-full">
         <nav className="space-y-1">
           {[...Array(8)].map((_, i) => (
             <div

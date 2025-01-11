@@ -64,7 +64,7 @@ export function RulesList() {
         <div
           key={rule.id}
           onClick={() => router.push(`/rule/${rule.id}`)}
-          className="cursor-pointer rounded-lg border border-gray-800 bg-gray-900 p-6 transition-all hover:border-gray-700 hover:bg-gray-800"
+          className="group cursor-pointer rounded-lg border border-gray-800 bg-gray-900 p-6 transition-all hover:border-gray-700 hover:bg-gray-800"
         >
           <div className="mb-4">
             <h3 className="mb-2 text-lg font-semibold">{rule.name}</h3>
@@ -78,23 +78,22 @@ export function RulesList() {
               {rule.categories.map((category) => (
                 <span
                   key={category}
-                  className="rounded-full bg-gray-800 px-3 py-1 text-xs"
+                  className="rounded-full bg-gray-800/80 px-3 py-1 text-xs text-gray-300 transition-colors group-hover:bg-gray-700"
                 >
                   {category}
                 </span>
               ))}
             </div>
 
-            <div>
-              <p className="text-sm font-medium">{rule.author.name}</p>
+            <div className="flex justify-end">
               <a
                 href={rule.author.contactUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-blue-400 hover:underline"
+                className="text-sm font-medium text-gray-300 hover:text-blue-400 hover:underline"
                 onClick={(e) => e.stopPropagation()} // Prevent card click when clicking the link
               >
-                Contact
+                {rule.author.name}
               </a>
             </div>
           </div>
