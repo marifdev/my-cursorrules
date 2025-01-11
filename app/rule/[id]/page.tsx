@@ -5,14 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import type { Rule } from '@/lib/types'
 
-interface PageProps {
-  params: {
-    id: string
-  }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-
-export default function RulePage({ params }: PageProps) {
+export default function RulePage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [rule, setRule] = useState<Rule | null>(null)
   const [isLoading, setIsLoading] = useState(true)
