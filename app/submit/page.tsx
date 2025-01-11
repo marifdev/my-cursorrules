@@ -250,7 +250,7 @@ export default function SubmitPage() {
 
           <div>
             <label className="mb-2 block text-sm font-medium">
-              Contact URL (Twitter/LinkedIn)
+              Contact URL (Website/Twitter/LinkedIn/GitHub)
             </label>
             <input
               type="url"

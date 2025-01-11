@@ -81,22 +81,20 @@ export function Sidebar() {
       <nav className="space-y-1">
         <button
           onClick={() => setSelectedCategory(null)}
-          className={`w-full flex items-center justify-between rounded-lg px-3 py-2 text-sm ${selectedCategory === null ? 'bg-gray-800' : 'hover:bg-gray-800'
-            }`}
+          className={`w-full flex items-center justify-between rounded-lg px-3 py-2 text-sm ${selectedCategory === null ? 'bg-gray-800' : 'hover:bg-gray-800'}`}
         >
           <span>All Categories</span>
-          <span className="text-gray-500">{totalRules}</span>
+          <span className="ml-2 text-gray-500">{totalRules}</span>
         </button>
 
         {categories.map((category) => (
           <button
             key={category.name}
             onClick={() => setSelectedCategory(category.name)}
-            className={`w-full flex items-center justify-between rounded-lg px-3 py-2 text-sm ${selectedCategory === category.name ? 'bg-gray-800' : 'hover:bg-gray-800'
-              }`}
+            className={`w-full flex items-center rounded-lg px-3 py-2 text-sm ${selectedCategory === category.name ? 'bg-gray-800' : 'hover:bg-gray-800'}`}
           >
-            <span>{category.name}</span>
-            <span className="text-gray-500">{category.count}</span>
+            <span className="flex-1 text-left">{category.name}</span>
+            <span className="ml-2 text-gray-500">{category.count}</span>
           </button>
         ))}
       </nav>

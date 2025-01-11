@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Rule } from '@/lib/types'
+import { useRules } from '../context/RulesContext'
 
 function truncateText(text: string, maxLength: number = 150) {
   if (text.length <= maxLength) return text
@@ -11,7 +12,8 @@ function truncateText(text: string, maxLength: number = 150) {
 
 export function RulesList() {
   const router = useRouter()
-  const [rules, setRules] = useState<Rule[]>([])
+  const { selectedCategory } = useRules()
+  const [allRules, setAllRules] = useState<Rule[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -23,7 +25,7 @@ export function RulesList() {
           throw new Error('Failed to fetch rules')
         }
         const data = await response.json()
-        setRules(data)
+        setAllRules(data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch rules')
       } finally {
@@ -33,6 +35,43 @@ export function RulesList() {
 
     fetchRules()
   }, [])
+
+  const filteredRules = selectedCategory
+    ? allRules.filter(rule => rule.categories.includes(selectedCategory))
+    : allRules
+
+  useEffect(() => {
+    function updateVisibleCategories() {
+      const cards = document.querySelectorAll('[data-rule-id]')
+      const newVisibleCategories: { [key: string]: number } = {}
+
+      cards.forEach((card) => {
+        const ruleId = card.getAttribute('data-rule-id')
+        if (!ruleId) return
+
+        const container = card.querySelector('.categories-container')
+        if (!container) return
+
+        const containerWidth = container.clientWidth
+        let totalWidth = 0
+        let visibleCount = 0
+
+        const categories = card.querySelectorAll('.category-item')
+        categories.forEach((category) => {
+          totalWidth += (category as HTMLElement).offsetWidth + 8 // 8px for gap
+          if (totalWidth <= containerWidth - 70) { // Leave space for "+X more"
+            visibleCount++
+          }
+        })
+
+        newVisibleCategories[ruleId] = visibleCount
+      })
+    }
+
+    updateVisibleCategories()
+    window.addEventListener('resize', updateVisibleCategories)
+    return () => window.removeEventListener('resize', updateVisibleCategories)
+  }, [filteredRules])
 
   if (isLoading) {
     return (
@@ -50,7 +89,7 @@ export function RulesList() {
     )
   }
 
-  if (rules.length === 0) {
+  if (filteredRules.length === 0) {
     return (
       <div className="rounded-lg border border-gray-800 bg-gray-900/50 p-8 text-center text-gray-400">
         No rules found. Be the first to submit one!
@@ -59,30 +98,52 @@ export function RulesList() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {rules.map((rule) => (
+    <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {filteredRules.map((rule) => (
         <div
           key={rule.id}
+          data-rule-id={rule.id}
           onClick={() => router.push(`/rule/${rule.id}`)}
-          className="group cursor-pointer rounded-lg border border-gray-800 bg-gray-900 p-6 transition-all hover:border-gray-700 hover:bg-gray-800"
+          className="group cursor-pointer rounded-lg border border-gray-800 bg-gray-900 p-4 sm:p-6 transition-all hover:border-gray-700 hover:bg-gray-800"
         >
-          <div className="mb-4">
-            <h3 className="mb-2 text-lg font-semibold">{rule.name}</h3>
+          <div className="mb-3 sm:mb-4">
+            <h3 className="mb-2 text-base sm:text-lg font-semibold">{rule.name}</h3>
             <p className="whitespace-pre-wrap text-sm text-gray-400">
-              {truncateText(rule.content)}
+              {truncateText(rule.content, window.innerWidth < 640 ? 100 : 150)}
             </p>
           </div>
 
           <div className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              {rule.categories.map((category) => (
+            <div className="flex flex-wrap gap-1.5 sm:gap-2 min-h-[28px] items-center">
+              {rule.categories.slice(0, window.innerWidth < 640 ? 2 : 4).map((category) => (
                 <span
                   key={category}
-                  className="rounded-full bg-gray-800/80 px-3 py-1 text-xs text-gray-300 transition-colors group-hover:bg-gray-700"
+                  className="category-item rounded-full bg-gray-800/80 px-2 py-0.5 sm:px-3 sm:py-1 text-xs text-gray-300 transition-colors group-hover:bg-gray-700"
                 >
                   {category}
                 </span>
               ))}
+              {rule.categories.length > (window.innerWidth < 640 ? 2 : 4) && (
+                <div className="relative group/tooltip">
+                  <span className="rounded-full bg-gray-800/80 px-2 py-0.5 sm:px-3 sm:py-1 text-xs text-gray-300 transition-colors group-hover:bg-gray-700 cursor-help">
+                    +{rule.categories.length - (window.innerWidth < 640 ? 2 : 4)} more
+                  </span>
+                  <div className="absolute bottom-full left-0 mb-2 hidden w-max max-w-[calc(100vw-2rem)] group-hover/tooltip:block z-10">
+                    <div className="bg-gray-800/95 backdrop-blur-sm rounded-lg p-2.5 shadow-xl border border-gray-700">
+                      <div className="flex flex-wrap gap-1.5">
+                        {rule.categories.slice(window.innerWidth < 640 ? 2 : 4).map((category) => (
+                          <span
+                            key={category}
+                            className="rounded-full bg-gray-700/80 px-2 py-0.5 text-xs text-gray-300 whitespace-nowrap"
+                          >
+                            {category}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end">
@@ -91,7 +152,7 @@ export function RulesList() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-medium text-gray-300 hover:text-blue-400 hover:underline"
-                onClick={(e) => e.stopPropagation()} // Prevent card click when clicking the link
+                onClick={(e) => e.stopPropagation()}
               >
                 {rule.author.name}
               </a>
