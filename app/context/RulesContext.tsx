@@ -35,6 +35,7 @@ export function RulesProvider({ children }: { children: ReactNode }) {
               )
             )
           `)
+          .eq('isActive', true)
           .order('created_at', { ascending: false })
 
         if (rulesError) throw rulesError
@@ -49,6 +50,7 @@ export function RulesProvider({ children }: { children: ReactNode }) {
           },
           categories: rule.rule_categories.map((rc: { categories: { name: string } }) => rc.categories.name),
           createdAt: rule.created_at,
+          isActive: rule.isActive,
         }))
 
         setRules(transformedRules)

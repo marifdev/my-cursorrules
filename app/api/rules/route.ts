@@ -23,6 +23,7 @@ export async function GET() {
           )
         )
       `)
+      .eq('is_active', true)
       .order('created_at', { ascending: false })
 
     if (rulesError) throw rulesError
@@ -38,6 +39,7 @@ export async function GET() {
       },
       categories: rule.rule_categories.map(rc => rc.categories.name),
       createdAt: rule.created_at,
+      isActive: rule.is_active,
     }))
 
     return NextResponse.json(transformedRules)

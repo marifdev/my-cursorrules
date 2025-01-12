@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { sendRuleSubmissionEmail } from '@/lib/emailjs'
 import type { RuleSubmission } from '@/lib/types'
 
 export default function SubmitPage() {
@@ -57,6 +58,19 @@ export default function SubmitPage() {
         throw new Error('At least one category is required')
       }
 
+      // Send email notification
+      try {
+        await sendRuleSubmissionEmail({
+          ruleName: formData.name,
+          authorName: formData.authorName,
+          content: formData.content,
+          categories: formData.categories,
+        })
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError)
+        // Continue with submission even if email fails
+      }
+
       // 1. Insert the rule
       const { data: rule, error: ruleError } = await supabase
         .from('rules')
@@ -65,6 +79,7 @@ export default function SubmitPage() {
           content: formData.content.trim(),
           author_name: formData.authorName.trim(),
           author_contact_url: formData.contactUrl.trim(),
+          is_active: false
         })
         .select()
         .single()

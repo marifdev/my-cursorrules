@@ -8,6 +8,7 @@ export interface Rule {
   }
   categories: string[]
   createdAt: string
+  isActive: boolean
 }
 
 export interface RuleSubmission {

@@ -18,6 +18,7 @@ export interface Database {
           author_contact_url: string
           author_avatar_url: string
           created_at: string
+          is_active: boolean
         }
         Insert: {
           id?: string
@@ -27,6 +28,7 @@ export interface Database {
           author_contact_url: string
           author_avatar_url: string
           created_at?: string
+          is_active?: boolean
         }
         Update: {
           id?: string
@@ -36,6 +38,7 @@ export interface Database {
           author_contact_url?: string
           author_avatar_url?: string
           created_at?: string
+          is_active?: boolean
         }
       }
       categories: {
