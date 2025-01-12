@@ -43,6 +43,11 @@ export default function SubmitPage() {
     setSuccess(false)
 
     try {
+      // Format contact URL if needed
+      const formattedContactUrl = formData.contactUrl.trim().match(/^https?:\/\//)
+        ? formData.contactUrl.trim()
+        : `https://${formData.contactUrl.trim()}`
+
       // Validate form data
       if (!formData.name.trim()) {
         throw new Error('Rule name is required')
@@ -80,7 +85,7 @@ export default function SubmitPage() {
           name: formData.name.trim(),
           content: formData.content.trim(),
           author_name: formData.authorName.trim(),
-          author_contact_url: formData.contactUrl.trim(),
+          author_contact_url: formattedContactUrl,
           is_active: false
         })
         .select()
@@ -282,10 +287,11 @@ export default function SubmitPage() {
                 Contact URL (Website/Twitter/LinkedIn/GitHub)
               </label>
               <input
-                type="url"
+                type="text"
                 value={formData.contactUrl}
                 onChange={(e) => setFormData({ ...formData, contactUrl: e.target.value })}
                 className="w-full rounded-lg bg-gray-800 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., marif.dev, github.com/username"
                 required
               />
             </div>

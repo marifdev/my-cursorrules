@@ -35,7 +35,7 @@ export function RulesProvider({ children }: { children: ReactNode }) {
               )
             )
           `)
-          .eq('isActive', true)
+          .eq('is_active', true)
           .order('created_at', { ascending: false })
 
         if (rulesError) throw rulesError
