@@ -24,7 +24,7 @@ export function Header({ onMenuClick }: HeaderProps) {
               </svg>
             </button>
             <Link href="/" className="text-xl font-bold">
-              mycursorrules
+              MyCursorRules
             </Link>
           </div>
 
