@@ -9,6 +9,17 @@ interface CategoryCount {
   count: number
 }
 
+interface CategoryData {
+  name: string
+  rule_categories: Array<{
+    rule_id: string
+    rules: {
+      id: string
+      is_active: boolean
+    } | null
+  }> | null
+}
+
 export function Sidebar() {
   const { selectedCategory, setSelectedCategory } = useRules()
   const [categories, setCategories] = useState<CategoryCount[]>([])
@@ -31,9 +42,9 @@ export function Sidebar() {
           .from('categories')
           .select(`
             name,
-            rule_categories!inner (
+            rule_categories:rule_categories!left (
               rule_id,
-              rules!inner (
+              rules:rules!left (
                 id,
                 is_active
               )
@@ -43,9 +54,11 @@ export function Sidebar() {
 
         if (error) throw error
 
-        const formattedCategories = (categoryCounts || []).map((category: any) => ({
+        const formattedCategories = (categoryCounts as unknown as CategoryData[] || []).map((category) => ({
           name: category.name,
-          count: category.rule_categories.filter((rc: any) => rc.rules.is_active).length
+          count: category.rule_categories?.reduce((acc, rc) =>
+            acc + (rc.rules?.is_active ? 1 : 0), 0
+          ) || 0
         }))
 
         setCategories(formattedCategories)
