@@ -10,6 +10,7 @@ export default function SubmitPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
   const [categories, setCategories] = useState<string[]>([])
   const [newCategory, setNewCategory] = useState('')
   const [formData, setFormData] = useState<RuleSubmission>({
@@ -39,6 +40,7 @@ export default function SubmitPage() {
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
+    setSuccess(false)
 
     try {
       // Validate form data
@@ -149,11 +151,16 @@ export default function SubmitPage() {
         throw categoryError
       }
 
-      router.push('/')
-      router.refresh() // Refresh the page to show the new rule
+      setSuccess(true)
+      // Redirect after 3 seconds
+      setTimeout(() => {
+        router.push('/')
+        router.refresh()
+      }, 3000)
     } catch (err) {
       console.error('Error submitting rule:', err)
       setError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.')
+    } finally {
       setIsSubmitting(false)
     }
   }
@@ -210,131 +217,139 @@ export default function SubmitPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-red-50 border-l-4 border-red-400 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-700">{error}</p>
+        {success ? (
+          <div className="rounded-lg border border-green-800 bg-green-900/50 p-6 text-center text-green-200">
+            <h2 className="mb-2 text-xl font-semibold">Thank you for your submission!</h2>
+            <p className="mb-4">Your rule has been submitted successfully and will be reviewed shortly.</p>
+            <p className="text-sm">Redirecting you to the home page...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 border-l-4 border-red-400 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-red-700">{error}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Rule Name
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full rounded-lg bg-gray-800 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Rule Content
-            </label>
-            <textarea
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              className="h-64 w-full rounded-lg bg-gray-800 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Your Name
-            </label>
-            <input
-              type="text"
-              value={formData.authorName}
-              onChange={(e) => setFormData({ ...formData, authorName: e.target.value })}
-              className="w-full rounded-lg bg-gray-800 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Contact URL (Website/Twitter/LinkedIn/GitHub)
-            </label>
-            <input
-              type="url"
-              value={formData.contactUrl}
-              onChange={(e) => setFormData({ ...formData, contactUrl: e.target.value })}
-              className="w-full rounded-lg bg-gray-800 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Categories
-            </label>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    placeholder="Search or add new categories"
-                    className="flex-1 rounded-lg bg-gray-800 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddCategory}
-                    disabled={!newCategory.trim()}
-                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600"
-                  >
-                    Add
-                  </button>
-                </div>
-                <p className="text-xs text-gray-400">
-                  Tip: You can add multiple categories at once by separating them with commas (e.g., &apos;TypeScript, React, Next.js&apos;)
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {filteredCategories.map((category) => (
-                  <button
-                    key={category}
-                    type="button"
-                    onClick={() => handleCategoryToggle(category)}
-                    className={`rounded-lg px-4 py-2 text-sm font-medium ${formData.categories.includes(category)
-                      ? 'bg-blue-600 hover:bg-blue-700'
-                      : 'bg-gray-800 hover:bg-gray-700'
-                      }`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {formData.categories.length === 0 && (
-              <p className="mt-2 text-sm text-red-500">
-                Please select at least one category
-              </p>
             )}
-          </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Rule Name
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full rounded-lg bg-gray-800 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting || formData.categories.length === 0}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600"
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit Rule'}
-          </button>
-        </form>
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Rule Content
+              </label>
+              <textarea
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                className="h-64 w-full rounded-lg bg-gray-800 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Your Name
+              </label>
+              <input
+                type="text"
+                value={formData.authorName}
+                onChange={(e) => setFormData({ ...formData, authorName: e.target.value })}
+                className="w-full rounded-lg bg-gray-800 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Contact URL (Website/Twitter/LinkedIn/GitHub)
+              </label>
+              <input
+                type="url"
+                value={formData.contactUrl}
+                onChange={(e) => setFormData({ ...formData, contactUrl: e.target.value })}
+                className="w-full rounded-lg bg-gray-800 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Categories
+              </label>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      placeholder="Search or add new categories"
+                      className="flex-1 rounded-lg bg-gray-800 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCategory}
+                      disabled={!newCategory.trim()}
+                      className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    Tip: You can add multiple categories at once by separating them with commas (e.g., &apos;TypeScript, React, Next.js&apos;)
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {filteredCategories.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => handleCategoryToggle(category)}
+                      className={`rounded-lg px-4 py-2 text-sm font-medium ${formData.categories.includes(category)
+                        ? 'bg-blue-600 hover:bg-blue-700'
+                        : 'bg-gray-800 hover:bg-gray-700'
+                        }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {formData.categories.length === 0 && (
+                <p className="mt-2 text-sm text-red-500">
+                  Please select at least one category
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting || formData.categories.length === 0}
+              className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600"
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Rule'}
+            </button>
+          </form>
+        )}
       </div>
     </main>
   )

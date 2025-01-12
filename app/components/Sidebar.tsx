@@ -13,6 +13,10 @@ interface CategoryData {
   name: string
   rule_categories: Array<{
     rule_id: string
+    rules: {
+      id: string
+      is_active: boolean
+    }
   }>
 }
 
@@ -25,29 +29,34 @@ export function Sidebar() {
   useEffect(() => {
     async function fetchCategories() {
       try {
-        // Get total rules count
+        // Get total active rules count
         const { count: rulesCount } = await supabase
           .from('rules')
           .select('*', { count: 'exact', head: true })
+          .eq('is_active', true)
 
         setTotalRules(rulesCount || 0)
 
-        // Get categories with their counts
+        // Get categories with their counts for active rules
         const { data: categoryCounts, error } = await supabase
           .from('categories')
           .select(`
             name,
             rule_categories!inner (
-              rule_id
+              rule_id,
+              rules!inner (
+                id,
+                is_active
+              )
             )
           `)
           .order('name')
 
         if (error) throw error
 
-        const formattedCategories = (categoryCounts as CategoryData[]).map(category => ({
+        const formattedCategories = (categoryCounts || []).map((category: any) => ({
           name: category.name,
-          count: new Set(category.rule_categories.map(rc => rc.rule_id)).size
+          count: category.rule_categories.filter((rc: any) => rc.rules.is_active).length
         }))
 
         setCategories(formattedCategories)
@@ -63,22 +72,25 @@ export function Sidebar() {
 
   if (isLoading) {
     return (
-      <aside className="w-64 border-r border-gray-800 p-6 h-full">
-        <nav className="space-y-1">
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="h-8 animate-pulse rounded-lg bg-gray-800"
-            />
-          ))}
-        </nav>
+      <aside className="w-64 border-r border-gray-800 h-full flex flex-col">
+        <div className="p-6">
+          <div className="h-8 animate-pulse rounded-lg bg-gray-800 mb-4" />
+          <nav className="space-y-1">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="h-8 animate-pulse rounded-lg bg-gray-800"
+              />
+            ))}
+          </nav>
+        </div>
       </aside>
     )
   }
 
   return (
-    <aside className="w-64 border-r border-gray-800 p-6">
-      <nav className="space-y-1">
+    <aside className="w-64 border-r border-gray-800 h-full flex flex-col">
+      <div className="flex-none p-6">
         <button
           onClick={() => setSelectedCategory(null)}
           className={`w-full flex items-center justify-between rounded-lg px-3 py-2 text-sm ${selectedCategory === null ? 'bg-gray-800' : 'hover:bg-gray-800'}`}
@@ -86,7 +98,9 @@ export function Sidebar() {
           <span>All Categories</span>
           <span className="ml-2 text-gray-500">{totalRules}</span>
         </button>
+      </div>
 
+      <nav className="flex-1 overflow-y-auto px-6 pb-6 space-y-1">
         {categories.map((category) => (
           <button
             key={category.name}
