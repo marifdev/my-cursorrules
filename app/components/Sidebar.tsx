@@ -9,17 +9,6 @@ interface CategoryCount {
   count: number
 }
 
-interface CategoryData {
-  name: string
-  rule_categories: Array<{
-    rule_id: string
-    rules: {
-      id: string
-      is_active: boolean
-    }
-  }>
-}
-
 export function Sidebar() {
   const { selectedCategory, setSelectedCategory } = useRules()
   const [categories, setCategories] = useState<CategoryCount[]>([])
